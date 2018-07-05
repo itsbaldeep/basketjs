@@ -9,7 +9,7 @@ canvas.style.backgroundColor = '#eee'
 let right = 0
 let left = 0
 let score = 0
-let highScore = localStorage.getItem('highscore') || 0
+let highScore = 0
 let enemyTimer = 2000
 
 canvas.addEventListener('mousedown', e => e.clientX > cx/2 ? right = 1 : left = 1)
@@ -99,9 +99,10 @@ const gameOver = () => {
         if (a.y > cx) {
             if (score > highScore) {
                 highScore = score
-                localStorage.setItem('highscore', highScore)
             }
-            location.reload()
+            score = 0
+            p.x = cx/2
+            e.splice(0, e.length)
         }
     })
 }
@@ -112,12 +113,10 @@ const scoreHandler = () => {
             score++
             if (score > highScore) {
                 highScore++
-                localStorage.setItem('highscore', highScore)
             }
         }
     })
 }
-
 const draw = () => {
     ctx.clearRect(0, 0, cx, cx)
     p.show()
