@@ -6,11 +6,32 @@ const cx = cw > ch ? 500 : cw
 canvas.width = canvas.height = cx
 document.body.appendChild(canvas)
 canvas.style.backgroundColor = '#eee'
+document.body.style.margin = '0'
 let right = 0
 let left = 0
 let score = 0
 let highScore = 0
 let enemyTimer = 2000
+let state = 'menu'
+
+const touch = e => {
+    e.touches[0].clientX > playButton.x && 
+    e.touches[0].clientX < playButton.x + playButton.w &&
+    e.touches[0].clientY > playButton.y &&
+    e.touches[0].clientY < playButton.y + playButton.h 
+    ? state = 'game' : 0
+}
+
+const click = e => {
+    e.clientX > playButton.x && 
+    e.clientX < playButton.x + playButton.w &&
+    e.clientY > playButton.y &&
+    e.clientY < playButton.y + playButton.h 
+    ? state = 'game' : 0
+}
+canvas.addEventListener('click', click)
+canvas.addEventListener('touchstart', touch)
+canvas.addEventListener('touchend', e => e.preventDefault())
 
 canvas.addEventListener('mousedown', e => e.clientX > cx/2 ? right = 1 : left = 1)
 canvas.addEventListener('mouseup', e => e.clientX > cx/2 ? right = 0 : left = 0)
@@ -22,6 +43,46 @@ document.addEventListener('keydown', e => e.keyCode == '37' ? left = 1 : 0)
 document.addEventListener('keydown', e => e.keyCode == '39' ? right = 1 : 0)
 document.addEventListener('keyup', e => e.keyCode == '37' ? left = 0 : 0)
 document.addEventListener('keyup', e => e.keyCode == '39' ? right = 0 : 0)
+
+class MenuItem {
+    constructor(x, y, w, h, c, r) {
+        this.x = x
+        this.y = y
+        this.w = w
+        this.h = h
+        this.c = c
+        this.r = r
+    }
+    show() {
+        ctx.beginPath()
+        ctx.fillStyle = this.c
+        ctx.moveTo(this.x+this.r, this.y)
+        ctx.arcTo(this.x+this.w, this.y, this.x+this.w, this.y+this.h, this.r)
+        ctx.arcTo(this.x+this.w, this.y+this.h, this.x, this.y+this.h, this.r)
+        ctx.arcTo(this.x, this.y+this.h, this.x, this.y, this.r)
+        ctx.arcTo(this.x, this.y, this.x+this.w, this.y, this.r)
+        ctx.fill()
+        ctx.closePath()
+    }
+}
+
+class MenuText {
+    constructor(t, x, y, f, c) {
+        this.t = t
+        this.x = x
+        this.y = y
+        this.f = f
+        this.c = c
+    }
+    show() {
+        ctx.beginPath()
+        ctx.font = `${this.f}px Tahoma`
+        ctx.fillStyle = this.c
+        ctx.fillText(this.t, this.x, this.y)
+        ctx.fill()
+        ctx.closePath()
+    }
+}
 
 class Player {
     constructor() {
@@ -77,8 +138,14 @@ class Score {
     }
 }
 
-p = new Player
-e = []
+const titleBox = new MenuItem(cx/2-cx/2.8, cx/2-cx/3, cx/1.4, cx/3, 'red', cx/12)
+const playButton = new MenuItem(cx/2-cx/3.6, cx/1.6, cx/1.8, cx/4, 'violet', cx/12)
+
+const title = new MenuText('Basket.js', titleBox.x+cx/10, titleBox.y+cx/5, cx/8, 'aliceblue')
+const play = new MenuText('PLAY', playButton.x+cx/6.2, playButton.y+cx/6.2, cx/10, 'aliceblue')
+
+const p = new Player
+let e = []
 
 const addEnemy = () => {
     e.push(new Enemy)
@@ -92,7 +159,7 @@ const speedUp = () => {
 }
 speedUp()
 
-s = new Score
+let s = new Score
 
 const gameOver = () => {
     e.forEach(a => {
@@ -101,12 +168,12 @@ const gameOver = () => {
                 highScore = score
             }
             score = 0
-            enemyTimer = 2000
             p.x = cx/2
             e.splice(0, e.length)
         }
     })
 }
+
 const scoreHandler = () => {
     e.forEach(a => {
         if (a.y > p.y && a.x < p.x + p.r && a.x > p.x - p.r) {
@@ -118,22 +185,24 @@ const scoreHandler = () => {
         }
     })
 }
+
 const draw = () => {
     ctx.clearRect(0, 0, cx, cx)
-    p.show()
-    p.move()
-    e.forEach(e => e.show())
-    e.forEach(e => e.move())
-    s.show()
-    scoreHandler()
-    gameOver()
-    requestAnimationFrame(draw)
+    if (state == 'menu'){
+        titleBox.show()
+        playButton.show()
+        title.show()
+        play.show()
+    }
+    else if (state == 'game'){
+        p.show()
+        p.move()
+        e.forEach(e => e.show())
+        e.forEach(e => e.move())
+        s.show()
+        scoreHandler()
+        gameOver()
+    }
+    requestAnimationFrame(draw)    
 }
 requestAnimationFrame(draw)
-
-const debug = () => {
-    console.log(`left = ${left == 0 ? 'not' : 'yes'}, right = ${right == 0 ? 'not' : 'yes'}`)
-    setTimeout(debug, 500)
-}
-// for checking left or right input
-// debug()
