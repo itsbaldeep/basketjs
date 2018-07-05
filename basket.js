@@ -101,6 +101,7 @@ const gameOver = () => {
                 highScore = score
             }
             score = 0
+            enemyTimer = 2000
             p.x = cx/2
             e.splice(0, e.length)
         }
