@@ -2,7 +2,7 @@
 This is a 2D Casual Game written in JavaScript, running via HTML and compatible on touchscreens and computers
 
 # TRY IT!
-itsbaldeep.github.io/basketjs on your Mobile/Desktop/Laptop or anywhere!
+https://itsbaldeep.github.io/basketjs on your Mobile/Desktop/Laptop or anywhere!
 
 # Description
 There is a rain of fruits!. You have a basket in your hands and the responsibility to not let the fruits drop on the ground. Can you save the fruits? Let's see how many of them you catch!
