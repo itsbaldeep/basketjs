@@ -9,6 +9,7 @@ canvas.style.backgroundColor = '#eee'
 let right = 0
 let left = 0
 let score = 0
+let highScore = localStorage.getItem('highscore') || 0
 let enemyTimer = 2000
 
 canvas.addEventListener('mousedown', e => e.clientX > cx/2 ? right = 1 : left = 1)
@@ -69,8 +70,8 @@ class Score {
     show() {
         ctx.beginPath()
         ctx.fillStyle = 'violet'
-        ctx.fillText(score, this.x, this.y)
-        ctx.font = `${cx/17}px Tahoma`
+        ctx.fillText(`Score: ${score} | High Score: ${highScore}`, this.x, this.y)
+        ctx.font = `${cx/20}px Tahoma`
         ctx.fill()
         ctx.closePath
     }
@@ -79,13 +80,13 @@ class Score {
 p = new Player
 e = []
 
-function addEnemy() {
+const addEnemy = () => {
     e.push(new Enemy)
     setTimeout(addEnemy, enemyTimer)
 }
 addEnemy()
 
-function speedUp() {
+const speedUp = () => {
     enemyTimer /= 1.009
     setTimeout(speedUp, 1000)
 }
@@ -93,20 +94,44 @@ speedUp()
 
 s = new Score
 
-function draw() {
+const gameOver = () => {
+    e.forEach(a => {
+        if (a.y > cx) {
+            if (score > highScore) {
+                highScore = score
+                localStorage.setItem('highscore', highScore)
+            }
+            location.reload()
+        }
+    })
+}
+const scoreHandler = () => {
+    e.forEach(a => {
+        if (a.y > p.y && a.x < p.x + p.r && a.x > p.x - p.r) {
+            e.splice(e.indexOf(a),1) 
+            score++
+            if (score > highScore) {
+                highScore++
+                localStorage.setItem('highscore', highScore)
+            }
+        }
+    })
+}
+
+const draw = () => {
     ctx.clearRect(0, 0, cx, cx)
     p.show()
     p.move()
     e.forEach(e => e.show())
     e.forEach(e => e.move())
     s.show()
-    e.forEach(a => a.y > p.y && a.x < p.x + p.r && a.x > p.x - p.r ? e.splice(e.indexOf(a),1) && score++ : 0)
-    e.forEach(a => a.y - a.dy > cx ? location.reload() : 0)
+    scoreHandler()
+    gameOver()
     requestAnimationFrame(draw)
 }
 requestAnimationFrame(draw)
 
-function debug() {
+const debug = () => {
     console.log(`left = ${left == 0 ? 'not' : 'yes'}, right = ${right == 0 ? 'not' : 'yes'}`)
     setTimeout(debug, 500)
 }
